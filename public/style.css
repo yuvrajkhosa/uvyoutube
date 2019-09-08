@@ -1,0 +1,143 @@
+html{
+  background-color: #292929;
+}
+.text{
+  font-family: "Arial";
+  color: #AEB6BF;
+}
+#inputURL{
+  left: 50%;
+  width: 100px;
+  height: 40px;
+  transform: translateX(-50%);
+  position: relative;
+  background-color: #363636;
+  border: none;
+  font-size: 15px;
+  font-family: "Helvetica";
+  text-align: center;
+  color: #a6a6a6;
+  border-radius: 10px;
+  transition-property: width;
+  transition-timing-function: ease;
+  transition-duration: 2s;
+}
+
+#inputURL:focus{
+  width: 1000px;
+  outline: none;
+   box-shadow: 0 0 3pt 2pt #292929;
+   animation-name: focusAnim;
+   animation-duration: 2s;
+   animation-iteration-count: infinite;
+}
+
+#player{
+  border: solid 10px #4a4948;
+  border-radius: 10px;
+  position: absolute;
+  margin-left: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -40%);
+  /* display:inline-block; */
+}
+.clientsInfo{
+  text-align: center;
+}
+
+h1{
+  text-align: center;
+}
+
+h2{
+  display: inline;
+}
+#clientList{
+  padding-left: 1px;
+  list-style-type: none;
+
+}
+.clientListDiv{
+  position: absolute;
+  top: 3%;
+  left: 0%;
+}
+.clientText{
+  cursor: pointer;
+  display: block;
+  width: 200px;
+  height: 25px;
+  padding: 1px;
+  margin-bottom: 5px;
+
+  border: none;
+  border-radius: 5px;
+  font-size: 18px;
+  color: #AEB6BF;
+  font-family: "Arial";
+}
+.clientText:hover{
+  animation-name: clientNameAnim;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+@keyframes clientNameAnim {
+    0%{
+      box-shadow: 0 0 2.5pt 2pt #292929;
+    }
+    50%{
+      box-shadow: 0 0 2.5pt 2pt;
+    }
+    100%{
+      box-shadow: 0 0 2.5pt 2pt #292929;
+    }
+}
+.clientText:hover span{
+  display: none;
+}
+.clientText:hover:before{
+  content:"Block?";
+}
+
+#passwordCheck{
+  position: relative;
+  pointer-events: none;
+  top: 0%;
+  left: 50%;
+  width: 0px;
+  height: 20px;
+  border-radius: 5px;
+  border: none;
+  outline: none;
+  text-align: center;
+  color: #a6a6a6;
+  background-color: #363636;
+  transform: translateX(-50%);
+
+  transition-property: width;
+  transition-duration: 2s;
+
+}
+
+#passwordCheck:focus{
+  animation-name: focusAnim;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  width: 200px;
+}
+
+
+@keyframes focusAnim {
+
+  0%{
+    box-shadow: 0 0 2.5pt 2pt #292929;
+  }
+  50%{
+    box-shadow: 0 0 2.5pt 2pt;
+  }
+  100%{
+    box-shadow: 0 0 2.5pt 2pt #292929;
+  }
+
+}
