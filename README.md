@@ -4,3 +4,5 @@ Watch youtube with friends. Youtube player will automaticaly sync with everyone 
 Allows blocking users
 
 ![alt text](https://i.imgur.com/S6E4g3I.png)
+
+https://uvyoutube.herokuapp.com/
