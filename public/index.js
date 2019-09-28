@@ -88,6 +88,36 @@ inputURL.addEventListener("keyup", event => {//Press enter in input bar
   }
 });
 
+document.getElementById("usernameField").addEventListener("keyup", event => {//Press enter in input bar
+  if(event.keyCode == 13){
+    event.preventDefault();
+
+    socket.emit("sendUsername", (document.getElementById("usernameField").value));
+
+
+
+  }
+});
+socket.on('responseUsername', name => document.getElementById("nameHeader").innerHTML = name);
+socket.on('usernameTaken', data => {
+
+  if(data[0] == true){//If failed is true
+    document.getElementById("usernameField").value = "";
+    if(data[1] == true){//If too long is true
+      document.getElementById("usernameField").placeholder = "Too long";
+    }
+    else{//If toolong is false
+      document.getElementById("usernameField").placeholder = "Name Taken";
+    }
+
+
+  }
+  else{
+    document.getElementById("nameHeader").innerHTML = document.getElementById("usernameField").value;
+    removeUsernameBar();
+  }
+});
+
 function sendURLToServer(url){
     if(url == ""){
       console.error("NO URL")
@@ -101,7 +131,7 @@ function sendURLToServer(url){
 }
 
 socket.on('clientCount', (data) => {
-
+  console.log("hle")
     while(document.getElementById("clientList").hasChildNodes()){//While there are still list items (client names) in the unordered list, keep removing them to start from a fresh slate
       document.getElementById("clientList").removeChild(document.getElementById("clientList").firstChild);
     }
@@ -111,7 +141,7 @@ socket.on('clientCount', (data) => {
 
       document.getElementById("clientList").appendChild(node);
       node.onclick = () => clientClicked(data.client[i]);//On click execute clientCLicked() with the IP of the client as an argument.
-      node.innerHTML = `<span>${data.client[i].substring(7)}</span>`;
+      node.innerHTML = `<span>${data.client[i]}</span>`;
       if(data.blockedUsers.includes(data.client[i])){//Server tells which users are blocked, if this user is in blocked list then maek then red
         node.style.backgroundColor = 'fireBrick';//SEt here because javascript cant grab color info from css without Window.getComputedStyle();
       }
@@ -138,7 +168,24 @@ socket.on('clientCount', (data) => {
     document.getElementById("clientCount").innerHTML = clientsCount;
 
 
-})
+});
+
+socket.on('changeBlockedUser', (data) => {
+  console.log("here");
+  let textNode = document.getElementById("clientList").children;//Store this as variable for readability
+  for(let i = 0; i < textNode.length; i++){//Go through the buttons of the unordered list
+    console.log(textNode[i].innerHTML.substring(6, textNode[i].innerHTML.length - 7))
+    if(textNode[i].innerHTML.substring(6, textNode[i].innerHTML.length - 7) == data.client){//This is to get only name and not <span> and </span> element
+      console.log("yea");
+      if(textNode[i].style.backgroundColor == 'grey'){//If it is not blocked (color is grey)
+        textNode[i].style.backgroundColor = 'fireBrick';//Change to red
+      }
+      else{
+        textNode[i].style.backgroundColor = 'grey';//Otherwise person is blocked and change back to grey
+      }
+    }
+  }
+});
 
 socket.on('connect', () => {
   socketId = socket.id;
@@ -205,21 +252,7 @@ function onPlayerReady(){
   console.log("Ready");
 }
 
-socket.on('changeBlockedUser', (data) => {
-  let textNode = document.getElementById("clientList").children;//Store this as variable for readability
-  for(let i = 0; i < textNode.length; i++){//Go through the buttons of the unordered list
 
-    if(textNode[i].innerHTML.substring(6, textNode[i].innerHTML.indexOf("/") - 1) == data.client.substring(7)){//This is to get only IP and not <span> and </span> element
-
-      if(textNode[i].style.backgroundColor == 'grey'){//If it is not blocked (color is grey)
-        textNode[i].style.backgroundColor = 'fireBrick';//Change to red
-      }
-      else{
-        textNode[i].style.backgroundColor = 'grey';//Otherwise person is blocked and change back to grey
-      }
-    }
-  }
-});
 
 
 
@@ -233,7 +266,15 @@ document.getElementById("passwordCheck").addEventListener("keyup", event => {//P
 });
 
 function clientClicked(client){
+
   selectedUserToBlock = client;
   document.getElementById("passwordCheck").focus();
 
+}
+
+function removeUsernameBar(){
+  document.getElementById("usernameField").classList.add("closeClass");
+  setTimeout(() => {
+    document.getElementById("usernameField").remove();
+  }, 1900)
 }

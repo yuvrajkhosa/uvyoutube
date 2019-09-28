@@ -5,11 +5,23 @@ html{
   font-family: "Arial";
   color: #AEB6BF;
 }
+.title{
+  transform: translateY(-100%);
+}
+.name{
+  position: absolute;
+  left: 90%;
+
+
+
+}
 #inputURL{
   left: 50%;
+  top: 50%;
   width: 100px;
   height: 40px;
-  transform: translateX(-50%);
+  transform: translate(-50%, -100%);
+
   position: relative;
   background-color: #363636;
   border: none;
@@ -32,6 +44,70 @@ html{
    animation-iteration-count: infinite;
 }
 
+#usernameField{
+
+
+
+  position: absolute;
+  left: 23.8%;
+  top: 18%;
+  width: 1000px;
+  height: 45px;
+
+
+
+
+  background-color: #363636;
+  border: none;
+  font-size: 15px;
+  font-family: "Helvetica";
+  text-align: center;
+  color: #a6a6a6;
+  border-radius: 5px;
+  outline: none;
+
+
+
+
+
+ animation-name: breath;
+ animation-duration: 2s;
+ animation-iteration-count: infinite;
+}
+
+#usernameField.closeClass{
+  animation-name: close;
+  animation-duration: 2s;
+}
+
+@keyframes breath {
+  0%{
+
+    transform: scale(0.9);
+    box-shadow: 0 0 5pt 5pt #FFFFFF;
+  }
+  50%{
+
+    transform: scale(1);
+    box-shadow: 0 0 5pt 5pt #363636;
+  }
+  100%{
+
+    transform: scale(0.9);
+    box-shadow: 0 0 5pt 5pt #FFFFFF;
+  }
+}
+
+@keyframes close {
+  0%{
+    transform: scaleX(1);
+  }
+
+  100%{
+    transform: scaleX(0);
+  }
+}
+
 #player{
   border: solid 10px #4a4948;
   border-radius: 10px;
@@ -39,7 +115,7 @@ html{
   margin-left: auto;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -40%);
+  transform: translate(-50%, -35%);
   /* display:inline-block; */
 }
 .clientsInfo{
@@ -103,8 +179,8 @@ h2{
 #passwordCheck{
   position: relative;
   pointer-events: none;
-  top: 0%;
-  left: 50%;
+
+  left: 5.5%;
   width: 0px;
   height: 20px;
   border-radius: 5px;
@@ -113,7 +189,9 @@ h2{
   text-align: center;
   color: #a6a6a6;
   background-color: #363636;
-  transform: translateX(-50%);
+  transform: translate(-50%, -90%);
+
+
 
   transition-property: width;
   transition-duration: 2s;

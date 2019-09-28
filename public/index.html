@@ -3,19 +3,30 @@
   <body>
     <link rel="stylesheet" href="style.css">
   <div class="clientsInfo">
+
       <h2 class="text" id="clientCount">1</h2>
       <h2 class="text" id="clientOrClients">Client</h2>
+      <h2 id = "nameHeader" class="name text"></h2>
 
   </div>
-    <h1 class="text" >Watch Youtube With Friends</h1>
-    <input data-lpignore="true" spellcheck="false" placeholder="Video URL" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Video URL'; this.value=''" id="inputURL" type = "text"></input>
 
+
+
+
+
+  <input data-lpignore="true" type="password" id = "passwordCheck" spellcheck="false" placeholder="Password">
+    <h1 class="text title" >Watch Youtube With Friends</h1>
+
+    <input data-lpignore="true" spellcheck="false" placeholder="Video URL" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Video URL'; this.value=''" id="inputURL" type = "text"></input>
+    <input data-lpignore="true" spellcheck="false" type="text" placeholder="Username" id="usernameField"></input>
     <div class="clientListDiv text">
-      <input data-lpignore="true" type="password" id = "passwordCheck" spellcheck="false" placeholder="Password">
+
+
       <ul id="clientList">
 
       </ul>
     </div>
+
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
