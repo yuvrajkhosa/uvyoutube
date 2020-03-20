@@ -3,7 +3,9 @@ var socketId;
 var counter = 0;
 var inputURL = document.getElementById("inputURL");
 socket = io.connect('/');
-
+var roomID = prompt("Enter Room ID");
+socket.emit("addToRoom", roomID);
+document.getElementById("roomNameTitle").innerHTML = roomID;
 var selectedUserToBlock;
 
 
@@ -48,6 +50,7 @@ function onPlayerStateChange(event){
       socket.emit("eventChange",
       {
         "id": socketId,
+        "room": roomID,
         "type": event.data,
         "time": player.getCurrentTime()
       });
@@ -68,7 +71,7 @@ function onPlayerStateChange(event){
       console.log("else block");
       setTimeout(() => {
         doNotChange = false;
-        socket.emit("firstTimeRequestForTime");
+        socket.emit("firstTimeRequestForTime", roomID);
         console.log(player.getPlayerState());
         }, 800);
     }
@@ -92,13 +95,13 @@ document.getElementById("usernameField").addEventListener("keyup", event => {//P
   if(event.keyCode == 13){
     event.preventDefault();
 
-    socket.emit("sendUsername", (document.getElementById("usernameField").value));
+    socket.emit("sendUsername", {name: document.getElementById("usernameField").value, currentName: document.getElementById("nameHeader").innerHTML,room: roomID});
 
 
 
   }
 });
-socket.on('responseUsername', name => document.getElementById("nameHeader").innerHTML = name);
+socket.on('responseUsername', name => {document.getElementById("nameHeader").innerHTML = name, socketId = name});
 socket.on('usernameTaken', data => {
 
   if(data[0] == true){//If failed is true
@@ -123,7 +126,7 @@ function sendURLToServer(url){
       console.error("NO URL")
     }
     else{
-      socket.emit("changeVideo", url);
+      socket.emit("changeVideo", {url: url, room: roomID, id: socketId});
       console.log(url);
     }
 
@@ -135,14 +138,15 @@ socket.on('clientCount', (data) => {
     while(document.getElementById("clientList").hasChildNodes()){//While there are still list items (client names) in the unordered list, keep removing them to start from a fresh slate
       document.getElementById("clientList").removeChild(document.getElementById("clientList").firstChild);
     }
+    console.log(data.client);
     for(let i = 0; i < data.client.length; i++){//Add all the clients one by one
       let node = document.createElement("button");
 
 
       document.getElementById("clientList").appendChild(node);
-      node.onclick = () => clientClicked(data.client[i]);//On click execute clientCLicked() with the IP of the client as an argument.
-      node.innerHTML = `<span>${data.client[i]}</span>`;
-      if(data.blockedUsers.includes(data.client[i])){//Server tells which users are blocked, if this user is in blocked list then maek then red
+      node.onclick = () => clientClicked(data.client[i][0]);//On click execute clientCLicked() with the IP of the client as an argument.
+      node.innerHTML = `<span>${data.client[i][0]}</span>`;
+      if(data.blockedUsers.includes(data.client[i][0])){//Server tells which users are blocked, if this user is in blocked list then maek then red
         node.style.backgroundColor = 'fireBrick';//SEt here because javascript cant grab color info from css without Window.getComputedStyle();
       }
       else{
@@ -188,7 +192,7 @@ socket.on('changeBlockedUser', (data) => {
 });
 
 socket.on('connect', () => {
-  socketId = socket.id;
+  //socketId = socket.id;
   console.log(`${socketId} connected`);
 
 });
@@ -212,7 +216,7 @@ socket.on('sendTimeData', () => {
 socket.on('forClient', (data) => {
   if(typeof data == "string"){
     player.loadVideoById(data);
-    console.log("Changing video");
+    console.log(`Changing video ${data.url}`);
   }
   else{
     if(data.id != socketId){//Execute if message not from self
@@ -259,7 +263,7 @@ function onPlayerReady(){
 document.getElementById("passwordCheck").addEventListener("keyup", event => {//Press enter in input bar
   if(event.keyCode == 13){
     event.preventDefault();
-    socket.emit("blockUser", {client: selectedUserToBlock, password: document.getElementById("passwordCheck").value})
+    socket.emit("blockUser", {client: selectedUserToBlock, password: document.getElementById("passwordCheck").value, room: roomID})
     document.getElementById("passwordCheck").value = "";
     document.getElementById("passwordCheck").placeholder = "Password";
   }
@@ -274,6 +278,7 @@ function clientClicked(client){
 
 function removeUsernameBar(){
   document.getElementById("usernameField").classList.add("closeClass");
+  socketId = document.getElementById("usernameField").value;
   setTimeout(() => {
     document.getElementById("usernameField").remove();
   }, 1900)

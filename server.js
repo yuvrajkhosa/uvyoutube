@@ -1,91 +1,157 @@
 const express = require('express');
 const app = express();
-const server = app.listen(process.env.PORT || 5000);//CHANGE THIS IF LOCAL
+const server = app.listen(3000)//app.listen(process.env.PORT || 5000);//CHANGE THIS IF LOCAL
 const io = require('socket.io')(server);
 var currentVideoCode = 'ooOELrGMn14';
 app.use(express.static('public'));
 console.log("Server running... ");
-const blockPassword = "nojooda";
+const blockPassword = "ratraj";
 var blockedList = [];
 const namesPrefix = ["Fluffy", "Big", "Large", "Hippity", "Small", "Cool"];
 const namesSuffix = ["Glass", "Water", "Phone", "Hippo", "Flamingo", "Cat"];
-
 var clientsObject = {};
 
 io.on("connect", (socket) => {
-  clientsObject[socket.id] = randomName();//Get random name assign to this socket.id. Must use full socket.id so we can sync up in beginnig
-  io.to(socket.id).emit('responseUsername', clientsObject[socket.id]);
-  console.log(clientsObject);
-  updateClientCount();
+  socket.on("addToRoom", (room) => {
+    socket.join(room);//Join the room that is entered as prompt in client
+    if(!clientsObject[room]){//If the room is not created, create one
+      clientsObject[room] = [];//Create empty array to store NAME and SOCKET ID (first 4 digits)
+    }
+
+    let randomName = getRandomName();//Get a random name
+    clientsObject[room].push([randomName, socket.id.substring(0, 4)]);//In the room object append the NAME and SOCKET ID to it. This is a user.
+    /*
+    {
+
+    "room1": [
+      ["BobJones", "a8xn"], ["BillyJean", "9dfn"]
+      ],
+
+    "room2": [
+      ["JasonMamoma", "2zd8"], ["SitDown", "fsDx"]
+      ]
+
+  }
+*/
+
+    io.to(socket.id).emit('responseUsername', randomName);
+    console.log(`Adding socket to room ${room}`);
+    console.log(clientsObject);
+    updateClientCount(room);
+  });
+
+
+
 
 
   socket.on("disconnect", () => {
-    delete clientsObject[socket.id];//Remove from object.
-    updateClientCount(false);//Client will be deleted from clientObject in updateClientCount();
-    try{//Try block incase we get -1. Or the person wasn't blocked
-      blockedList.splice(blockedList.indexOf(socket.id), 1);
-    }
-    catch(error){
-      console.log("Person not blocked")
-    }
+    console.log(`OBJECTs Length ${clientsObject.length}`);
+    console.log(clientsObject);
+    for(let i = 0; i < Object.keys(clientsObject).length; i++){
 
+       for(let j = 0; j < clientsObject[Object.keys(clientsObject)[i]].length; j++){
+          console.log(`Rooms ${clientsObject[Object.keys(clientsObject)[i]]}`)
+          if(clientsObject[Object.keys(clientsObject)[i]][j][1] == socket.id.substring(0, 4)){
+
+            clientsObject[Object.keys(clientsObject)[i]].splice(j, 1);
+
+            updateClientCount(Object.keys(clientsObject)[i]);
+
+            if(clientsObject[Object.keys(clientsObject)[i]].length == 0){
+
+              delete clientsObject[Object.keys(clientsObject)[i]];
+
+            }
+            console.log("OBJECT");
+            console.log(clientsObject);
+            return;
+          }
+
+        }
+    }
+    // //delete clientsObject[room];//Remove from object.
+    // updateClientCount();//Client will be deleted from clientObject in updateClientCount();
+    // try{//Try block incase we get -1. Or the person wasn't blocked
+    //   blockedList.splice(blockedList.indexOf(socket.id), 1);
+    // }
+    // catch(error){
+    //   console.log("Person not blocked")
+    // }
+    // console.log(`UPDATED: ${clientsObject}`)
   });
 
 
-  socket.on('firstTimeRequestForTime', () => {
+
+  socket.on('firstTimeRequestForTime', (room) => {
       // console.log(Object.keys(clientsObject));
-      io.to(Object.keys(clientsObject)[0]).emit("sendTimeData");//This will tell master socket (first person to connect) to pause video which will jump EVERYONE to current position.
+      //io.to(Object.keys(clientsObject)[0]).emit("sendTimeData");//This will tell master socket (first person to connect) to pause video which will jump EVERYONE to current position.
+      //io.to(clientsObject[room][0])
+      //console.log(`First Time Request sending to ${clientsObject[room][0]}`);
   });
-  socket.on('sendUsername', (name) => {
-    let data = [false, true];//First index is whether it failed. Second is if its too long
+  socket.on('sendUsername', (data) => {
+    console.log(`Changing name | CurrentName: ${data.currentName} | Newname ${data.name}`)
+    let outputData = [false, true];//First index is whether it failed. Second is if its too long
     let invalid = false;//Variable to store whether the username is invalid throughout the search
-    for(let i = 0; i < Object.values(clientsObject).length; i++){//Search through the clients Object if names is taken
-      let objectName = Object.values(clientsObject)[i].toLowerCase();//For readability
-      console.log(objectName)
-      if(objectName == name.toLowerCase()){//Same name
-        data[0] = true;
-        data[1] = false;
+    for(let i = 0; i < clientsObject[data.room].length; i++){//Search through the clients Object if names is taken
+      let objectName = clientsObject[data.room][i][0].toLowerCase();//For readability
+      //console.log(objectName)
+      if(objectName == data.name.toLowerCase()){//Same name
+        outputData[0] = true;
+        outputData[1] = false;
         invalid = true;
       }
-      else if(name.length > 18){// Name too long | We know name is already tooLong = true, but gotta make first indsx (failed or not) to true
-        data[0] = true;
+      else if(data.name.length > 18){// Name too long | We know name is already tooLong = true, but gotta make first indsx (failed or not) to true
+        outputData[0] = true;
         invalid = true;
       }
       if(invalid) break;//If problem found, just leave the loop
     }
     if(!invalid){//If no problems, update name on server object and globally on clients
-      clientsObject[socket.id] = name;
-      updateClientCount();
+      for(let i = 0; i < clientsObject[data.room].length; i++){
+
+        console.log(`Iteration i:${i} currentName: ${data.currentName} proposedName: ${clientsObject[data.room][i][0]}`)
+
+        if(clientsObject[data.room][i][0] == data.currentName){
+          console.log(`Updating ${data.currentName} to ${data.name} I = ${i}`)
+          clientsObject[data.room][i][0] = data.name
+        }
+      }
+      if(blockedList.includes(data.currentName)){
+        blockedList[blockedList.indexOf(data.currentName)] = data.name;
+      }
+      updateClientCount(data.room);
     }
 
 
-    io.to(socket.id).emit('usernameTaken', data);
-    console.log(`Username ${name}`);
+    io.to(socket.id).emit('usernameTaken', outputData);
+    console.log(clientsObject);
 
   });
   socket.on('playerIsReady', () => {
     //io.emit("forClient", currentVideoCode);
     io.sockets.connected[socket.id].emit("firstConnectVideo", currentVideoCode);
-    console.log(`Player ready ${socket.id}`);
+    //console.log(`Player ready ${socket.id}`);
   });
   socket.on("eventChange", (data) => {
-    if(blockCheck(socket.id)){
+    console.log(data.id)
+    if(blockedList.includes(data.id)){
       return;
     }
     //  console.log(data);
-      io.emit("forClient", data);
+      io.to(data.room).emit("forClient", data);
   });
 
-  socket.on("changeVideo", (url) =>{
-    if(blockCheck(socket.id)){
+  socket.on("changeVideo", (data) =>{//HERE
+    console.log(data.id)
+    if(blockedList.includes(data.id)){
       return;
     }
-    currentVideoCode = extractID(url);
-	  io.emit("forClient", currentVideoCode);
+    currentVideoCode = extractID(data.url);
+	  io.to(data.room).emit("forClient", currentVideoCode);
   });
 
   socket.on("blockUser", (data) => {
-    console.log(`Blocking ${data.client} with password ${data.password} id ${Object.keys(clientsObject)[Object.values(clientsObject).indexOf(data.client)]}`);
+    console.log(`Blocking ${data.client} with password ${data.password}`);
     //let id = Object.keys(clientsObject)[Object.values(clientsObject).indexOf(data.client)];
 
     if(data.password == blockPassword){
@@ -106,7 +172,7 @@ io.on("connect", (socket) => {
 
       }
 
-      io.emit("changeBlockedUser", dataToSend);
+      io.to(data.room).emit("changeBlockedUser", dataToSend);
     }
     console.log(blockedList);
   });
@@ -117,14 +183,14 @@ io.on("connect", (socket) => {
 
 })
 
-function updateClientCount(isAdded){
+function updateClientCount(room){
 
   let data = {
-    client: Object.values(clientsObject),
+    client: clientsObject[room],
     blockedUsers: blockedList
   }
-
-  io.emit("clientCount", data);
+  //console.log(`Data: ${data.client}`);
+  io.to(room).emit("clientCount", data);
 
 }
 
@@ -153,7 +219,7 @@ function extractID(url){
   return(finalString);
 }
 
-function randomName(){
+function getRandomName(){
   return(`${namesPrefix[Math.floor(Math.random() * namesPrefix.length)]} ${namesSuffix[Math.floor(Math.random() * namesSuffix.length)]}`)
 }
 
