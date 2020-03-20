@@ -5,7 +5,7 @@ const io = require('socket.io')(server);
 var currentVideoCode = 'ooOELrGMn14';
 app.use(express.static('public'));
 console.log("Server running... ");
-const blockPassword = "nojooda";
+const blockPassword = "ratraj";
 var blockedList = [];
 const namesPrefix = ["Fluffy", "Big", "Large", "Hippity", "Small", "Cool"];
 const namesSuffix = ["Glass", "Water", "Phone", "Hippo", "Flamingo", "Cat"];
