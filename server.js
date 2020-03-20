@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const server = app.listen(3000)//app.listen(process.env.PORT || 5000);//CHANGE THIS IF LOCAL
+const server = app.listen(process.env.PORT || 5000);//CHANGE THIS IF LOCAL app.listen(3000)
 const io = require('socket.io')(server);
 var currentVideoCode = 'ooOELrGMn14';
 app.use(express.static('public'));
