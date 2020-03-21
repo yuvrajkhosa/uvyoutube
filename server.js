@@ -1,14 +1,14 @@
 const express = require('express');
 const app = express();
-const server = app.listen(process.env.PORT || 5000);//CHANGE THIS IF LOCAL app.listen(3000)
+const server = app.listen(3000);//app.listen(process.env.PORT || 5000);//CHANGE THIS IF LOCAL app.listen(3000)
 const io = require('socket.io')(server);
 var currentVideoCode = 'ooOELrGMn14';
 app.use(express.static('public'));
 console.log("Server running... ");
 const blockPassword = "ratraj";
 var blockedList = [];
-const namesPrefix = ["Fluffy", "Big", "Large", "Hippity", "Small", "Cool"];
-const namesSuffix = ["Glass", "Water", "Phone", "Hippo", "Flamingo", "Cat"];
+const namesPrefix = ["Fluffy", "Big", "Large", "Hippity", "Small", "Cool", "Fast", "Intelligent", "Offbeat", "Inconclusive", "Undesirable", "Unbreakable", "Insane", "Stupid", "Goofy"];
+const namesSuffix = ["Glass", "Water", "Phone", "Hippo", "Flamingo", "Cat", "Computer", "Bottle", "Mouse", "Rat", "Crow", "Elephant", "Gamer", "Loser", "Man", "Woman", "Clown", "Plague"];
 var clientsObject = {};
 
 io.on("connect", (socket) => {
