@@ -13,6 +13,7 @@ var clientsObject = {};
 
 io.on("connect", (socket) => {
   socket.on("addToRoom", (room) => {
+	room = room.toLowerCase();
     socket.join(room);//Join the room that is entered as prompt in client
     if(!clientsObject[room]){//If the room is not created, create one
       clientsObject[room] = [];//Create empty array to store NAME and SOCKET ID (first 4 digits)
