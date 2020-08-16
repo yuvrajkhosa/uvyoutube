@@ -3,7 +3,7 @@ var socketId;
 var counter = 0;
 var inputURL = document.getElementById("inputURL");
 socket = io.connect('/');
-var roomID = prompt("Enter Room ID");
+var roomID = prompt("Enter Room ID").toLowerCase();
 socket.emit("addToRoom", roomID);
 document.getElementById("roomNameTitle").innerHTML = roomID;
 var selectedUserToBlock;
@@ -74,6 +74,7 @@ function onPlayerStateChange(event){
         socket.emit("firstTimeRequestForTime", roomID);
         console.log(player.getPlayerState());
         }, 800);
+        setTimeout(() => {player.playVideo(); console.log("Playing")}, 1600);
     }
   }
   else{

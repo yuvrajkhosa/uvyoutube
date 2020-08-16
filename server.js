@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const server = app.listen(process.env.PORT || 5000); //app.listen(3000);//app.listen(process.env.PORT || 5000);//CHANGE THIS IF LOCAL app.listen(3000)
+const server = app.listen(process.env.PORT || 5000);//app.listen(3000);
 const io = require('socket.io')(server);
 var currentVideoCode = 'ooOELrGMn14';
 app.use(express.static('public'));
@@ -12,8 +12,8 @@ const namesSuffix = ["Glass", "Water", "Phone", "Hippo", "Flamingo", "Cat", "Com
 var clientsObject = {};
 
 io.on("connect", (socket) => {
-  socket.on("addToRoom", (room) => {
-	room = room.toLowerCase();
+  socket.on("addToRoom", (roomID) => {
+	  room = roomID.toLowerCase();
     socket.join(room);//Join the room that is entered as prompt in client
     if(!clientsObject[room]){//If the room is not created, create one
       clientsObject[room] = [];//Create empty array to store NAME and SOCKET ID (first 4 digits)
@@ -84,10 +84,10 @@ io.on("connect", (socket) => {
 
 
   socket.on('firstTimeRequestForTime', (room) => {
-      // console.log(Object.keys(clientsObject));
-      //io.to(Object.keys(clientsObject)[0]).emit("sendTimeData");//This will tell master socket (first person to connect) to pause video which will jump EVERYONE to current position.
-      //io.to(clientsObject[room][0])
-      //console.log(`First Time Request sending to ${clientsObject[room][0]}`);
+      console.log(Object.keys(clientsObject));
+      io.to(Object.keys(clientsObject)[0]).emit("sendTimeData");//This will tell master socket (first person to connect) to pause video which will jump EVERYONE to current position.
+      io.to(clientsObject[room][0])
+      console.log(`First Time Request sending to ${clientsObject[room][0]}`);
   });
   socket.on('sendUsername', (data) => {
     console.log(`Changing name | CurrentName: ${data.currentName} | Newname ${data.name}`)
