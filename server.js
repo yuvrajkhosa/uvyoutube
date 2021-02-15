@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const server = app.listen(process.env.PORT || 5000);//app.listen(3000);
+
 const io = require('socket.io')(server);
 var currentVideoCode = 'ooOELrGMn14';
 app.use(express.static('public'));
@@ -17,23 +18,14 @@ io.on("connect", (socket) => {
     socket.join(room);//Join the room that is entered as prompt in client
     if(!clientsObject[room]){//If the room is not created, create one
       clientsObject[room] = [];//Create empty array to store NAME and SOCKET ID (first 4 digits)
+	  clientsObject[room]['videoCode'] = '5OWOQF3dWi0';
+	  console.log("WOLF VIDE");
     }
 
     let randomName = getRandomName();//Get a random name
-    clientsObject[room].push([randomName, socket.id.substring(0, 4)]);//In the room object append the NAME and SOCKET ID to it. This is a user.
-    /*
-    {
-
-    "room1": [
-      ["BobJones", "a8xn"], ["BillyJean", "9dfn"]
-      ],
-
-    "room2": [
-      ["JasonMamoma", "2zd8"], ["SitDown", "fsDx"]
-      ]
-
-  }
-*/
+    clientsObject[room].push([randomName, socket.id]);//In the room object append the NAME and SOCKET ID to it. This is a user.
+	
+    
 
     io.to(socket.id).emit('responseUsername', randomName);
     console.log(`Adding socket to room ${room}`);
@@ -85,9 +77,11 @@ io.on("connect", (socket) => {
 
   socket.on('firstTimeRequestForTime', (room) => {
       console.log(Object.keys(clientsObject));
-      io.to(Object.keys(clientsObject)[0]).emit("sendTimeData");//This will tell master socket (first person to connect) to pause video which will jump EVERYONE to current position.
-      io.to(clientsObject[room][0])
-      console.log(`First Time Request sending to ${clientsObject[room][0]}`);
+      //io.to(Object.keys(clientsObject)[0]).emit("sendTimeData");//This will tell master socket (first person to connect) to pause video which will jump EVERYONE to current position.
+      //io.to(clientsObject[room][0])
+	io.to(clientsObject[room][0][1]).emit("sendTimeData");
+	  console.log(`FIRST TIME ${room} obj: ${clientsObject}`);
+      //console.log(`First Time Request sending to ${clientsObject[room][0]}`);
   });
   socket.on('sendUsername', (data) => {
     console.log(`Changing name | CurrentName: ${data.currentName} | Newname ${data.name}`)
@@ -128,9 +122,11 @@ io.on("connect", (socket) => {
     console.log(clientsObject);
 
   });
-  socket.on('playerIsReady', () => {
+  socket.on('playerIsReady', (room) => {
+		console.log(`Player ready: ${room}`);
+	socket.emit("firstConnectVideo", clientsObject[room]['videoCode']);
     //io.emit("forClient", currentVideoCode);
-    io.sockets.connected[socket.id].emit("firstConnectVideo", currentVideoCode);
+    //io.sockets.connected[socket.id].emit("firstConnectVideo", currentVideoCode);
     //console.log(`Player ready ${socket.id}`);
   });
   socket.on("eventChange", (data) => {
@@ -147,8 +143,11 @@ io.on("connect", (socket) => {
     if(blockedList.includes(data.id)){
       return;
     }
-    currentVideoCode = extractID(data.url);
-	  io.to(data.room).emit("forClient", currentVideoCode);
+	let vc = extractID(data.url);
+    clientsObject[data.room]['videoCode'] = vc;
+	console.log(clientsObject);
+	//currentVideoCode = extractID(data.url);
+	  io.to(data.room).emit("forClient", vc);
   });
 
   socket.on("blockUser", (data) => {

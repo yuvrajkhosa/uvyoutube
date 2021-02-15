@@ -19,11 +19,11 @@ var doNotChange;
 var player;
 window.onYouTubeIframeAPIReady = function() {
   player = new YT.Player('player', {
-      videoId: 'ErQQc6cUSTA',
+      videoId: 'bzrpgj1i-pg',
       height: '600',
       width: '1000',
       playerVars: {
-          color: "blue",
+      
           controls: 1,
           autoplay: 0,
           enablejsapi: 1,
@@ -97,8 +97,6 @@ document.getElementById("usernameField").addEventListener("keyup", event => {//P
     event.preventDefault();
 
     socket.emit("sendUsername", {name: document.getElementById("usernameField").value, currentName: document.getElementById("nameHeader").innerHTML,room: roomID});
-
-
 
   }
 });
@@ -250,10 +248,10 @@ socket.on('firstConnectVideo', (url) =>{
     doNotChange = true;
 
     player.loadVideoById(url);
-    console.log("First connection");
+    console.log("First connection: " + url);
 })
 function onPlayerReady(){
-  socket.emit('playerIsReady');
+  socket.emit('playerIsReady', roomID);
   console.log("Ready");
 }
 
