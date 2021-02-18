@@ -1,3 +1,5 @@
+const e = require('express');
+const { response } = require('express');
 const express = require('express');
 const app = express();
 const server = app.listen(process.env.PORT || 5000);//app.listen(3000);
@@ -6,7 +8,7 @@ const io = require('socket.io')(server);
 var currentVideoCode = 'ooOELrGMn14';
 app.use(express.static('public'));
 console.log("Server running... ");
-const blockPassword = "frickraj";
+const blockPassword = "dipper";
 var blockedList = [];
 const namesPrefix = ["Fluffy", "Big", "Large", "Hippity", "Small", "Cool", "Fast", "Intelligent", "Offbeat", "Inconclusive", "Undesirable", "Unbreakable", "Insane", "Stupid", "Goofy"];
 const namesSuffix = ["Glass", "Water", "Phone", "Hippo", "Flamingo", "Cat", "Computer", "Bottle", "Mouse", "Rat", "Crow", "Elephant", "Gamer", "Loser", "Man", "Woman", "Clown", "Plague"];
@@ -44,7 +46,7 @@ io.on("connect", (socket) => {
 
        for(let j = 0; j < clientsObject[Object.keys(clientsObject)[i]].length; j++){
           console.log(`Rooms ${clientsObject[Object.keys(clientsObject)[i]]}`)
-          if(clientsObject[Object.keys(clientsObject)[i]][j][1] == socket.id.substring(0, 4)){
+          if(clientsObject[Object.keys(clientsObject)[i]][j][1] == socket.id){
 
             clientsObject[Object.keys(clientsObject)[i]].splice(j, 1);
 
@@ -76,13 +78,22 @@ io.on("connect", (socket) => {
 
 
   socket.on('firstTimeRequestForTime', (room) => {
+      console.log(`First Time request from: ${socket.id}`)
       console.log(Object.keys(clientsObject));
       //io.to(Object.keys(clientsObject)[0]).emit("sendTimeData");//This will tell master socket (first person to connect) to pause video which will jump EVERYONE to current position.
       //io.to(clientsObject[room][0])
-	io.to(clientsObject[room][0][1]).emit("sendTimeData");
-	  console.log(`FIRST TIME ${room} obj: ${clientsObject}`);
-      //console.log(`First Time Request sending to ${clientsObject[room][0]}`);
+    if(clientsObject[room].length > 1){
+      //io.to(clientsObject[room][0][1]).emit("sendTimeData");
+      io.to(clientsObject[room][0][1]).emit("sendTimeData", socket.id);//Tell the captain client to send its time to server
+    }
+    
+      console.log(`FIRST TIME ${room} obj:`);
+      console.log(clientsObject)
+        //console.log(`First Time Request sending to ${clientsObject[room][0]}`);
   });
+  socket.on("sendTime", (data) => {//Recieve the time and the new client's id and send them new time
+    io.to(data.id).emit("recieveTime", data.time)
+  })
   socket.on('sendUsername', (data) => {
     console.log(`Changing name | CurrentName: ${data.currentName} | Newname ${data.name}`)
     let outputData = [false, true];//First index is whether it failed. Second is if its too long

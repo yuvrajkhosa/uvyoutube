@@ -196,22 +196,28 @@ socket.on('connect', () => {
 
 });
 
-socket.on('sendTimeData', () => {
-
-  if(player.getPlayerState() == 1){
-    player.pauseVideo();
-  }
-  else{
-    player.playVideo();
-    setTimeout(() => {
-      console.log("Pausing");
-      pause();//Must use function because of some scope issue
-      reverseOneSecond();
-    }, 1000);
-  }
+socket.on('sendTimeData', (socketID) => {
+  
+  console.log("Sending to: " + socketID)
+  socket.emit("sendTime", {id: socketID, time: player.getCurrentTime()})
+  // if(player.getPlayerState() == 1){
+  //   player.pauseVideo();
+  // }
+  // else{
+  //   player.playVideo();
+  //   setTimeout(() => {
+  //     console.log("Pausing");
+  //     pause();//Must use function because of some scope issue
+  //     reverseOneSecond();
+  //   }, 1000);
+  // }
 
 })
 
+socket.on('recieveTime', (time) => {
+  console.log("skipping to: " + time)
+  player.seekTo(time);
+})
 socket.on('forClient', (data) => {
   if(typeof data == "string"){
     player.loadVideoById(data);
